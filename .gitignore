@@ -1,0 +1,15 @@
+# Python cache #
+################
+*.pyc
+__pycache__
+
+# Editor files #
+################
+.idea
+*~
+
+# IPython #
+###########
+*.ipynb
+
+cache/
