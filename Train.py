@@ -4,7 +4,6 @@ import glob
 import os
 import shutil
 import Loss
-import Display
 import traceback
 
 def train(
@@ -22,17 +21,27 @@ def train(
     if metrics is None: metrics = []
     if displays is None: displays = []
 
-    if os.path.exists(output_dir) and input("Restart training (y/N)? ").lower() == "y":
-        shutil.rmtree(output_dir)
-    if not os.path.exists(output_dir):
-        os.mkdir(output_dir)
-
     loaded_epoch = 0
-    files = natsort.natsorted(glob.glob(output_dir + "/model_*"))
-    if files:
-        from keras.models import load_model
-        model = load_model(files[-1])
-        loaded_epoch = int(os.path.splitext(files[-1])[0][len(output_dir + "/model_"):])
+    model_files = natsort.natsorted(glob.glob(output_dir + "/model_*"))
+    if model_files:
+        loaded_epoch = int(os.path.splitext(model_files[-1])[0][len(output_dir + "/model_"):])
+        print("Found model at epoch {}".format(loaded_epoch))
+
+    if os.path.exists(output_dir):
+        if input("Restart training (y/N)? ").lower() == "y":
+            shutil.rmtree(output_dir)
+            loaded_epoch = 0
+        elif model_files:
+            from keras.models import load_model
+            model = load_model(model_files[-1])
+    else:
+        def mkdir(path):
+            parent = os.path.dirname(path)
+            if not os.path.exists(parent):
+                mkdir(parent)
+            if not os.path.exists(path):
+                os.mkdir(path)
+        mkdir(output_dir)
 
     class Metric: pass
     custom_metrics = []
@@ -108,8 +117,6 @@ def train(
             '''))
         print("\r" + msg)
         for display in displays:
-            if isinstance(display, str):
-                display = Display.displays[display]
             try:
                 display(scope)
             except:

@@ -18,57 +18,60 @@ def progress(train):
             plt.show()
         plt.close()
 
-def predict_seq(train):
-    demo_samples = 100
-    
-    output_dir = train["output_dir"]
-    x, y = train["data_test"]
-    x, y = x[:demo_samples], y[:demo_samples]
-    
-    mem = np.zeros((1,) + x.shape[1:])
-    guided_predict = np.zeros((demo_samples,) + y.shape[1:])
-    raw_predict = np.zeros((demo_samples,) + y.shape[1:])
+def predict_seq(multidim):
 
-    for i in range(demo_samples):
-        mem[0] = x[i]
-        vec = train["model"].predict(mem)[0]
-        raw_predict[i] = vec
-        guided_predict[i] = np.random.random(y.shape[1:]) < vec
+    def display(train):
+        demo_samples = 100
 
-    plt.imshow(y.T, aspect="auto", origin="lower", cmap="Blues", interpolation="nearest")
-    plt.savefig(output_dir + "/correct_predict.png")
-    if train["ipython"]:
-        plt.show()
-    plt.close()
+        output_dir = train["output_dir"]
+        x, y = train["data_test"]
+        x, y = x[:demo_samples], y[:demo_samples]
 
-    try:
-        plt.imshow(guided_predict.T, aspect="auto", origin="lower", cmap="Blues", interpolation="nearest")
-        plt.savefig(output_dir + "/guided_predict_{}.png".format(train["epoch"]))
+        mem = np.zeros((1,) + x.shape[1:])
+        guided_predict = np.zeros((demo_samples,) + y.shape[1:])
+        raw_predict = np.zeros((demo_samples,) + y.shape[1:])
+
+        for i in range(demo_samples):
+            mem[0] = x[i]
+            vec = train["model"].predict(mem)[0]
+            raw_predict[i] = vec
+            if multidim:
+                guided_predict[i] = np.random.random(y.shape[1:]) < vec
+            else:
+                choice = np.random.choice(x.shape[-1], p=vec/np.sum(vec))
+                guided_predict[i][choice] = 1
+
+        plt.imshow(y.T, aspect="auto", origin="lower", cmap="Blues", interpolation="nearest")
+        plt.savefig(output_dir + "/correct_predict.png")
         if train["ipython"]:
             plt.show()
         plt.close()
-    except:
-        traceback.print_exc()
-    
-    try:
-        plt.imshow(raw_predict.T, aspect="auto", origin="lower", norm=matplotlib.colors.LogNorm(), cmap="jet", interpolation="nearest")
-        plt.colorbar()
-        plt.savefig(output_dir + "/raw_predict_{}.png".format(train["epoch"]))
-        if train["ipython"]:
-            plt.show()
-        plt.close()
-    except:
-        traceback.print_exc()
 
-    try:
-        if train["epoch"] % 5 == 0:
-            import tools.Image
-            tools.Image.images2gif(output_dir + "/guided_predict_", output_dir + "/guided_predict.gif")
-            tools.Image.images2gif(output_dir + "/raw_predict_", output_dir + "/raw_predict.gif")
-    except:
-        traceback.print_exc()
+        try:
+            plt.imshow(guided_predict.T, aspect="auto", origin="lower", cmap="Blues", interpolation="nearest")
+            plt.savefig(output_dir + "/guided_predict_{}.png".format(train["epoch"]))
+            if train["ipython"]:
+                plt.show()
+            plt.close()
+        except:
+            traceback.print_exc()
 
-displays = {
-    "progress": progress,
-    "predict_seq": predict_seq,
-}
+        try:
+            plt.imshow(raw_predict.T, aspect="auto", origin="lower", norm=matplotlib.colors.LogNorm(), cmap="jet", interpolation="nearest")
+            plt.colorbar()
+            plt.savefig(output_dir + "/raw_predict_{}.png".format(train["epoch"]))
+            if train["ipython"]:
+                plt.show()
+            plt.close()
+        except:
+            traceback.print_exc()
+
+        try:
+            if train["epoch"] % 5 == 0:
+                import tools.Image
+                tools.Image.images2gif(output_dir + "/guided_predict_", output_dir + "/guided_predict.gif")
+                tools.Image.images2gif(output_dir + "/raw_predict_", output_dir + "/raw_predict.gif")
+        except:
+            traceback.print_exc()
+
+    return display

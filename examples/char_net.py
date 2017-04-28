@@ -3,13 +3,14 @@ import keras
 import matplotlib.pyplot as plt
 
 import os
+root = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 import sys
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+sys.path.append(root)
 
 from Dataset import *
 import Train
 
-mem_size = 16
+mem_size = 100
 
 batch_size = 32
 epochs = 40
@@ -24,9 +25,9 @@ from keras.layers.recurrent import LSTM
 from keras.layers.core import Dense, Activation, Dropout
 
 model = Sequential()
-model.add(LSTM(256, return_sequences=True, input_shape=(mem_size, lib.classes)))
+model.add(LSTM(128, return_sequences=True, input_shape=(mem_size, lib.classes)))
 model.add(Dropout(0.2))
-model.add(LSTM(256))
+model.add(LSTM(128))
 model.add(Dropout(0.2))
 model.add(Dense(lib.classes))
 model.add(Activation("softmax"))
@@ -36,15 +37,16 @@ model.compile(loss="categorical_crossentropy",
               metrics=["accuracy"])
 model.summary()
 
+from Display import *
 train = Train.train(
-    "char_net",
+    root + "/cache/char_net",
 
     model,
     data_train,
 
     data_test=data_test,
 
-    displays=["progress", "predict_seq", demo_text(lib)],
+    displays=[progress, predict_seq(multidim=False)],
 )
 train(batch_size=batch_size,
       epochs=epochs)
