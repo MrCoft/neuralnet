@@ -28,20 +28,19 @@ def train(
         print("Found model at epoch {}".format(loaded_epoch))
 
     if os.path.exists(output_dir):
-        if input("Restart training (y/N)? ").lower() == "y":
+        if not model_files or input("Restart training (y/N)? ").lower() == "y":
             shutil.rmtree(output_dir)
             loaded_epoch = 0
-        elif model_files:
+        else:
             from keras.models import load_model
             model = load_model(model_files[-1])
-    else:
-        def mkdir(path):
-            parent = os.path.dirname(path)
-            if not os.path.exists(parent):
-                mkdir(parent)
-            if not os.path.exists(path):
-                os.mkdir(path)
-        mkdir(output_dir)
+    def mkdir(path):
+        parent = os.path.dirname(path)
+        if not os.path.exists(parent):
+            mkdir(parent)
+        if not os.path.exists(path):
+            os.mkdir(path)
+    mkdir(output_dir)
 
     class Metric: pass
     custom_metrics = []

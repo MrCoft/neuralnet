@@ -2,6 +2,7 @@ import numpy as np
 import pickle
 from Dataset import Dataset, flatten
 import os
+import traceback
 
 class PianoLib:
     def __init__(self, file):
@@ -66,19 +67,26 @@ def demo_midi(lib, length=10):
         finally:
             sys.stdout = stdout
 
-        mp3_file = os.path.splitext(demo_file)[0] + ".mp3"
-        if os.path.exists(mp3_file):
-            os.remove(mp3_file)
-        os.system("timidity {} -Ow -o - | ffmpeg -i - -acodec libmp3lame -ab 256k {}".format(demo_file, mp3_file))
+        try:
+            mp3_file = os.path.splitext(demo_file)[0] + ".mp3"
+            if os.path.exists(mp3_file):
+                os.remove(mp3_file)
+            os.system("timidity {} -Ow -o - | ffmpeg -i - -acodec libmp3lame -ab 256k {}".format(demo_file, mp3_file))
+            import time
+            time.sleep(0.1)
+            if not os.path.exists(mp3_file):
+                raise Exception("mp3 file not created")
 
-        if train["ipython"]:
-            import librosa
-            wave, rate = librosa.load(mp3_file)
-            import matplotlib.pyplot as plt
-            plt.plot(wave)
-            plt.show()
+            if train["ipython"]:
+                import librosa
+                wave, rate = librosa.load(mp3_file)
+                import matplotlib.pyplot as plt
+                plt.plot(wave)
+                plt.show()
 
-            from IPython.display import Audio, display
-            display(Audio(wave, rate=rate))
+                from IPython.display import Audio, display
+                display(Audio(wave, rate=rate))
+        except:
+            traceback.print_exc()
 
     return display
