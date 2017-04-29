@@ -21,19 +21,18 @@ def train(
     if metrics is None: metrics = []
     if displays is None: displays = []
 
-    loaded_epoch = 0
+    epoch = 0
     model_files = natsort.natsorted(glob.glob(output_dir + "/model_*"))
     if model_files:
-        loaded_epoch = int(os.path.splitext(model_files[-1])[0][len(output_dir + "/model_"):])
-        print("Found model at epoch {}".format(loaded_epoch))
+        epoch = int(os.path.splitext(model_files[-1])[0][len(output_dir + "/model_"):])
+        print("Found model at epoch {}".format(epoch))
 
     if os.path.exists(output_dir):
         if not model_files or input("Restart training (y/N)? ").lower() == "y":
             shutil.rmtree(output_dir)
-            loaded_epoch = 0
+            epoch = 0
         else:
-            from keras.models import load_model
-            model = load_model(model_files[-1])
+            model.load_weights(model_files[-1])
     def mkdir(path):
         parent = os.path.dirname(path)
         if not os.path.exists(parent):
@@ -69,14 +68,13 @@ def train(
         score /= len(pts)
         return score
 
-    epoch = 0
     scope = locals()
     def cb_log(e, logs):
         nonlocal epoch
-        epoch = e + 1 + loaded_epoch
+        epoch += 1
         scope["epoch"] = epoch
 
-        model.save(output_dir + "/model_{}.h5".format(epoch))
+        model.save_weights(output_dir + "/model_{}.h5".format(epoch))
 
         msg = ""
         msg += "Epoch {}".format(epoch)
@@ -115,6 +113,10 @@ def train(
                 </style>
             '''))
         print("\r" + msg)
+
+        run_displays()
+
+    def run_displays():
         for display in displays:
             try:
                 display(scope)
@@ -123,8 +125,12 @@ def train(
 
     def train(epochs=1, **kwargs):
         from keras.callbacks import LambdaCallback
+        epochs -= epoch
+
+        if epoch:
+            run_displays()
         model.fit(*data_train,
-                  epochs=epochs-loaded_epoch,
+                  epochs=epochs,
                   validation_data=data_test,
                   verbose=1,
                   callbacks=[LambdaCallback(on_epoch_end=cb_log)],

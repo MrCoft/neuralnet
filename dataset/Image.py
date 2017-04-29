@@ -60,12 +60,14 @@ def demo_ae(grid=(4, 4)):
         import matplotlib.pyplot as plt
 
         plt.imshow(correct)
+        plt.title("Correct")
         plt.savefig(output_dir + "/correct_image.png")
         if train["ipython"]:
             plt.show()
         plt.close()
 
         plt.imshow(decoded)
+        plt.title("Decoded")
         plt.savefig(output_dir + "/decoded_image_{}.png".format(train["epoch"]))
         if train["ipython"]:
             plt.show()
