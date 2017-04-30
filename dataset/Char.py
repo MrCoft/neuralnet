@@ -45,17 +45,17 @@ def demo_text(lib, demo_samples=500):
     def display(train):
         x, y = train["data_test"]
 
-        mem = x[0].reshape((1,) + x.shape[1:])
+        mem = x[0].copy()
         samples = np.zeros((demo_samples, lib.classes))
 
         for i in range(demo_samples):
-            vec = train["model"].predict(mem)[0]
+            vec = train["model"].predict(np.expand_dims(mem, axis=0))[0]
             choice = np.random.choice(lib.classes, p=vec/np.sum(vec))
             vec = np.zeros(lib.classes)
             vec[choice] = 1
             samples[i] = vec
-            mem[0][0:-1] = mem[0][1:]
-            mem[0][-1] = vec
+            mem[0:-1] = mem[1:]
+            mem[-1] = vec
 
         text = lib.vector_to_chars(samples)
         print(text)

@@ -48,21 +48,24 @@ def train(
         metric = Metric()
         metric.name = metric_name
         metric.cmp, n = Loss.metrics[metric_name]
-        metric.train_pts = np.random.randint(0, data_train[0].shape[0], (n,))
+        metric.train_pts = np.random.randint(0, len(data_train[0]), (n,))
         if data_test:
-            metric.test_pts = np.random.randint(0, data_test[0].shape[0], (n,))
+            metric.test_pts = np.random.randint(0, len(data_test[0]), (n,))
         custom_metrics.append(metric)
+
+    validate = data_test is not None
+    if not validate:
+        data_test = data_train
 
     def measure(cmp, data, pts):
         x, y = data
-        mem = np.zeros((1,) + x.shape[1:])
         correct = None
         predict = None
         score = 0
         for i in pts:
-            mem[0] = x[i]
+            mem = x[i]
             correct = y[i]
-            vec = model.predict(mem)[0]
+            vec = model.predict(np.expand_dims(mem, axis=0))[0]
             predict = np.random.random(y.shape[1:]) < vec
             score += cmp(correct, predict)
         score /= len(pts)
@@ -99,24 +102,25 @@ def train(
         if ipython:
             from IPython.display import clear_output
             clear_output()
-            from IPython.core.display import display, HTML
-            display(HTML('''
-                <style>
-                    .output_wrapper, .output {
-                        height:auto !important;
-                        max-height:none;
-                    }
-                    .output_scroll {
-                        box-shadow:none !important;
-                        webkit-box-shadow:none !important;
-                    }
-                </style>
-            '''))
         print("\r" + msg)
+        display()
 
-        run_displays()
+    if ipython:
+        from IPython.core.display import display, HTML
+        display(HTML('''
+            <style>
+                .output_wrapper, .output {
+                    height:auto !important;
+                    max-height:none;
+                }
+                .output_scroll {
+                    box-shadow:none !important;
+                    webkit-box-shadow:none !important;
+                }
+            </style>
+        '''))
 
-    def run_displays():
+    def display():
         for display in displays:
             try:
                 display(scope)
@@ -128,10 +132,10 @@ def train(
         epochs -= epoch
 
         if epoch:
-            run_displays()
+            display()
         model.fit(*data_train,
                   epochs=epochs,
-                  validation_data=data_test,
+                  validation_data=data_test if validate else None,
                   verbose=1,
                   callbacks=[LambdaCallback(on_epoch_end=cb_log)],
                   **kwargs)

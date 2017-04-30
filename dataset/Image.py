@@ -38,7 +38,9 @@ def open_image(path, size):
 
     return img
 
-def demo_ae(grid=(4, 4)):
+def demo_ae(ae, grid=(4, 4)):
+    encoder, decoder = ae
+
     def display(train):
         output_dir = train["output_dir"]
         x, y = train["data_test"]
@@ -49,8 +51,9 @@ def demo_ae(grid=(4, 4)):
         i = 0
         for _x in range(grid[0]):
             for _y in range(grid[1]):
-                mem = x[i].reshape((1,) + x.shape[1:])
-                vec = train["model"].predict(mem)[0]
+                mem = x[i]
+                z = encoder.predict(np.expand_dims(mem, axis=0))[0]
+                vec = decoder.predict(np.expand_dims(z, axis=0))[0]
 
                 correct[_x*w:(_x+1)*w,_y*h:(_y+1)*h] = y[i]
                 decoded[_x*w:(_x+1)*w,_y*h:(_y+1)*h] = vec
@@ -58,17 +61,18 @@ def demo_ae(grid=(4, 4)):
                 i += 1
 
         import matplotlib.pyplot as plt
+        import scipy.misc
 
         plt.imshow(correct)
         plt.title("Correct")
-        plt.savefig(output_dir + "/correct_image.png")
+        scipy.misc.imsave(output_dir + "/correct_image.png", correct)
         if train["ipython"]:
             plt.show()
         plt.close()
 
         plt.imshow(decoded)
         plt.title("Decoded")
-        plt.savefig(output_dir + "/decoded_image_{}.png".format(train["epoch"]))
+        scipy.misc.imsave(output_dir + "/decoded_image_{}.png".format(train["epoch"]), decoded)
         if train["ipython"]:
             plt.show()
         plt.close()

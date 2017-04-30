@@ -1,2 +1,7 @@
-# movie / dir of movies
-# iterator
+
+def VideoGen(path):
+
+    def gen():
+        
+
+    return gen

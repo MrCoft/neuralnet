@@ -14,26 +14,28 @@ def vae_loss(z_mean, z_log_var, input_shape):
 
     return loss
 
-def demo_vae_gen(generator, grid=(4, 4)):
+def demo_vae_gen(ae, grid=(4, 4)):
+    encoder, decoder = ae
 
     def display(train):
         output_dir = train["output_dir"]
 
-        batch_size, encoded_dim = generator.input_shape
-        batch_size, w, h, c = generator.output_shape
+        batch_size, encoded_dim = decoder.input_shape
+        batch_size, w, h, c = decoder.output_shape
         img = np.zeros((w * grid[0], h * grid[1], 3))
         for _x in range(grid[0]):
             for _y in range(grid[1]):
-                mem = np.random.normal(size=(1, encoded_dim))
-                vec = generator.predict(mem)[0]
+                z = np.random.normal(size=encoded_dim)
+                vec = decoder.predict(np.expand_dims(z, axis=0))[0]
 
                 img[_x*w:(_x+1)*w,_y*h:(_y+1)*h] = vec
 
         import matplotlib.pyplot as plt
+        import scipy.misc
 
         plt.imshow(img)
         plt.title("Generated")
-        plt.savefig(output_dir + "/decoded_image_{}.png".format(train["epoch"]))
+        scipy.misc.imsave(output_dir + "/generated_image_{}.png".format(train["epoch"]), img)
         if train["ipython"]:
             plt.show()
         plt.close()

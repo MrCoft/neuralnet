@@ -41,15 +41,15 @@ def demo_midi(lib, length=10):
     def display(train):
         x, y = train["data_test"]
 
-        mem = x[0].reshape((1,) + x.shape[1:])
+        mem = x[0].copy()
         samples = np.zeros((demo_samples, lib.classes))
 
         for i in range(demo_samples):
-            vec = train["model"].predict(mem)[0]
+            vec = train["model"].predict(np.expand_dims(mem, axis=0))[0]
             vec = np.random.random(y.shape[1:]) < vec
             samples[i] = vec
-            mem[0][0:-1] = mem[0][1:]
-            mem[0][-1] = vec
+            mem[0:-1] = mem[1:]
+            mem[-1] = vec
 
         demo_file = train["output_dir"] + "/sample_{}.mid".format(train["epoch"])
 

@@ -27,13 +27,12 @@ def predict_seq(multidim):
         x, y = train["data_test"]
         x, y = x[:demo_samples], y[:demo_samples]
 
-        mem = np.zeros((1,) + x.shape[1:])
         guided_predict = np.zeros((demo_samples,) + y.shape[1:])
         raw_predict = np.zeros((demo_samples,) + y.shape[1:])
 
         for i in range(demo_samples):
-            mem[0] = x[i]
-            vec = train["model"].predict(mem)[0]
+            mem = x[i]
+            vec = train["model"].predict(np.expand_dims(mem, axis=0))[0]
             raw_predict[i] = vec
             if multidim:
                 guided_predict[i] = np.random.random(y.shape[1:]) < vec
