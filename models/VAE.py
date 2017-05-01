@@ -25,7 +25,7 @@ def demo_vae_gen(ae, grid=(4, 4)):
         img = np.zeros((w * grid[0], h * grid[1], 3))
         for _x in range(grid[0]):
             for _y in range(grid[1]):
-                z = np.random.normal(size=encoded_dim)
+                z = np.random.normal(size=encoded_dim) * 5.
                 vec = decoder.predict(np.expand_dims(z, axis=0))[0]
 
                 img[_x*w:(_x+1)*w,_y*h:(_y+1)*h] = vec
