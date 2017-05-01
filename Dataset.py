@@ -38,7 +38,7 @@ def random_slice(data_len, seg_len):
 
 def split_data(data, ratio=0.2):
     pos = int(len(data) * (1 - ratio))
-    return data[:pos], data[:pos]
+    return data[:pos], data[pos:]
 
 class Dataset:
     def __init__(self):

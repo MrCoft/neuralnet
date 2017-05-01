@@ -44,18 +44,18 @@ def train(
     class Metric: pass
     custom_metrics = []
 
+    validate = data_test is not None
+    if not validate:
+        data_test = data_train
+
     for metric_name in metrics:
         metric = Metric()
         metric.name = metric_name
         metric.cmp, n = Loss.metrics[metric_name]
         metric.train_pts = np.random.randint(0, len(data_train[0]), (n,))
-        if data_test:
+        if validate:
             metric.test_pts = np.random.randint(0, len(data_test[0]), (n,))
         custom_metrics.append(metric)
-
-    validate = data_test is not None
-    if not validate:
-        data_test = data_train
 
     def measure(cmp, data, pts):
         x, y = data
@@ -88,7 +88,7 @@ def train(
                 traceback.print_exc()
                 value = float("nan")
             logs[metric.name] = value
-            if data_test:
+            if validate:
                 try:
                     value = measure(metric.cmp, data_test, metric.test_pts)
                 except:
