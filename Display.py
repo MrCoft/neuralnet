@@ -66,7 +66,7 @@ def predict_seq(multidim):
             traceback.print_exc()
 
         try:
-            if train["epoch"] % 5 == 0:
+            if train["epoch"] % 10 == 0:
                 import tools.Image
                 tools.Image.images2gif(output_dir + "/guided_predict_", output_dir + "/guided_predict.gif")
                 tools.Image.images2gif(output_dir + "/raw_predict_", output_dir + "/raw_predict.gif")
