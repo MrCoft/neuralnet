@@ -34,7 +34,7 @@ def get_info(path):
 
 def get_data(path, size):
     width, height = size
-    cmd = "ffmpeg -i {} -vf \"scale=-1:{},crop={}:{}\" -f image2pipe -pix_fmt rgb24 -vcodec rawvideo -".format(path, height, width, height)
+    cmd = "ffmpeg -i {} -vf \"scale={}:{}:force_original_aspect_ratio=increase,crop={}:{}\" -sws_flags lanczos -f image2pipe -pix_fmt rgb24 -vcodec rawvideo -".format(path, width, height, width, height)
     data = subprocess.check_output(cmd, shell=True)
     video = np.fromstring(data, "uint8").reshape(-1, height, width, 3)
     video = np.transpose(video, (0, 2, 1, 3))

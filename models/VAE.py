@@ -33,9 +33,9 @@ def demo_vae_gen(ae, grid=(4, 4)):
         import matplotlib.pyplot as plt
         import scipy.misc
 
-        plt.imshow(img)
+        plt.imshow(np.transpose(img, (1, 0, 2)))
         plt.title("Generated")
-        scipy.misc.imsave(output_dir + "/generated_image_{}.png".format(train["epoch"]), img)
+        scipy.misc.imsave(output_dir + "/generated_image_{}.png".format(train["epoch"]), np.transpose(img, (1, 0, 2)))
         if train["ipython"]:
             plt.show()
         plt.close()

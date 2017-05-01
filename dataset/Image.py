@@ -18,6 +18,7 @@ def open_image(path, size):
     from PIL import Image
     img = Image.open(path).convert('RGB')
     img = np.array(img)
+    img = np.transpose(img, (1, 0, 2))
 
     w, h = size
     r = w / h
@@ -63,16 +64,16 @@ def demo_ae(ae, grid=(4, 4)):
         import matplotlib.pyplot as plt
         import scipy.misc
 
-        plt.imshow(correct)
+        plt.imshow(np.transpose(correct, (1, 0, 2)))
         plt.title("Correct")
-        scipy.misc.imsave(output_dir + "/correct_image.png", correct)
+        scipy.misc.imsave(output_dir + "/correct_image.png", np.transpose(correct, (1, 0, 2)))
         if train["ipython"]:
             plt.show()
         plt.close()
 
-        plt.imshow(decoded)
+        plt.imshow(np.transpose(decoded, (1, 0, 2)))
         plt.title("Decoded")
-        scipy.misc.imsave(output_dir + "/decoded_image_{}.png".format(train["epoch"]), decoded)
+        scipy.misc.imsave(output_dir + "/decoded_image_{}.png".format(train["epoch"]), np.transpose(decoded, (1, 0, 2)))
         if train["ipython"]:
             plt.show()
         plt.close()
@@ -82,6 +83,7 @@ def demo_ae(ae, grid=(4, 4)):
             tools.Image.images2gif(output_dir + "/decoded_image_", output_dir + "/decoded_image.gif")
 
     return display
+# print all transposed, transpose read images
 
 # generator - read imagemagick
 
