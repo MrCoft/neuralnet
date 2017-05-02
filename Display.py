@@ -9,7 +9,7 @@ def progress(train):
 
     table = parse_log(output_dir + "/log.txt")
 
-    for metric, data in table.items():
+    for metric, data in sorted(table.items()):
         plt.title(metric)
         plt.plot(data)
         plt.xlabel("Epoch")

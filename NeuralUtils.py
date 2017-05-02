@@ -78,15 +78,17 @@ def parse_log(path):
 
     return table
 
-def compare_models(dir):
-    model_dirs = next(os.walk('.'))[1]
-    logs = [parse_log(dir + "/log.txt") for dir in model_dirs]
+def compare_models(dir, names):
+    model_dirs = next(os.walk(dir))[1]
+    model_dirs = [model_dir for model_dir in model_dirs if model_dir in names or names is None]
+    logs = [parse_log(os.path.join(dir, model_dir, "log.txt")) for model_dir in model_dirs]
 
     import matplotlib.pyplot as plt
     for metric in logs[0]:
         plt.title(metric)
-        for log in logs:
-            plt.plot(log[metric], label=model_dirs[0])
+        for i, log in enumerate(logs):
+            plt.plot(log[metric], label=model_dirs[i])
+        plt.legend()
         plt.xlabel("Epoch")
         plt.savefig("{}.png".format(metric))
         plt.close()
