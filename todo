@@ -1,0 +1,25 @@
+adadelta
+encoding size
+batch_size
+different model
+in each best case, try out all optimizers again
+
+prune - a function that reduces a folder to the useful parts
+
+        loss distrib strategy
+    turn off metric, dont provide validation, do it manually, print graph
+
+starnet layer
+    on linux
+    fake data
+
+    frequency of models report
+
+better music:
+    starnet
+    convolution
+    focus
+
+func - graph min/max std thingy
+
+auto stop train

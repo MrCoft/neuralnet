@@ -55,8 +55,8 @@ def demo_midi(lib, length=10):
 
         from miditime.miditime import MIDITime
         midi = MIDITime(bpm, demo_file)
-        samples = lib.vector_to_piano(samples)
-        midi_data = [[i, note, 127, 0.5] for i, notes in enumerate(samples) for note in notes]
+        song = lib.vector_to_piano(samples)
+        midi_data = [[i, note, 127, 0.5] for i, notes in enumerate(song) for note in notes]
         midi.add_track(midi_data)
         try:
             import sys
@@ -68,6 +68,12 @@ def demo_midi(lib, length=10):
             sys.stdout = stdout
 
         try:
+            if train["ipython"]:
+                import matplotlib.pyplot as plt
+                plt.imshow(samples.T, aspect="auto", origin="lower", cmap="Blues", interpolation="nearest")
+                plt.title("Generated")
+                plt.show()
+
             mp3_file = os.path.splitext(demo_file)[0] + ".mp3"
             if os.path.exists(mp3_file):
                 os.remove(mp3_file)
@@ -80,9 +86,6 @@ def demo_midi(lib, length=10):
             if train["ipython"]:
                 import librosa
                 wave, rate = librosa.load(mp3_file)
-                import matplotlib.pyplot as plt
-                plt.plot(wave)
-                plt.show()
 
                 from IPython.display import Audio, display
                 display(Audio(wave, rate=rate))

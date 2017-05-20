@@ -1,7 +1,9 @@
 import numpy as np
 import itertools
 import pickle
+import os
 from NeuralUtils import slice_index
+import math
 
 def flatten(iter, depth=1):
     for i in range(depth):
@@ -36,9 +38,45 @@ def random_slice(data_len, seg_len):
     start = np.random.randint(0, data_len - (seg_len - 1))
     return slice(start, start + seg_len)
 
-def split_data(data, ratio=0.2):
+def split_data(data, ratio=0.2, rand=False, size=None):
     pos = int(len(data) * (1 - ratio))
-    return data[:pos], data[pos:]
+    if size:
+        pos = min(pos, size)
+    if not rand:
+        return data[:pos], data[pos:]
+    else:
+        import random
+        length = len(data) - pos
+        pos = round(pos * random.random())
+        return np.concatenate((data[:pos], data[pos+length:])), data[pos:pos+length]
+
+def repeat_data(data, length):
+    n = math.ceil(length / len(data))
+    data = np.tile(data, (n,) + (1,) * (data.ndim - 1))
+    return data[:length]
+
+def save_data(path, data_train, data_test=None):
+    def save(path, x, y):
+        np.save(path + "_x" + ".npy", x)
+        if x is not y:
+            np.save(path + "_y" + ".npy", y)
+    save(path + "_train", *data_train)
+    if data_test:
+        save(path + "_test", *data_test)
+def load_data(path):
+    def load(path):
+        data_path = path + "_x" + ".npy"
+        if not os.path.exists(data_path):
+            return None
+        x = np.load(data_path)
+        data_path = path + "_y" + ".npy"
+        if not os.path.exists(data_path):
+            return x, x
+        y = np.load(data_path)
+        return x, y
+    data_train = load(path + "_train")
+    data_test = load(path + "_test")
+    return data_train, data_test
 
 class Dataset:
     def __init__(self):

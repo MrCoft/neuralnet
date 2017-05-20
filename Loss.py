@@ -1,5 +1,14 @@
 import numpy as np
 
+def safe_log(vec):
+    return np.log2(vec + 1e-20)
+
+def categorical_crossentropy(correct, predict):
+    return -np.mean(correct * safe_log(predict))
+
+def binary_crossentropy(correct, predict):
+    return -np.mean(correct * safe_log(predict) + (1. - correct) * safe_log(1. - predict))
+
 def levenshtein(source, target):
     if len(source) < len(target):
         return levenshtein(target, source)
@@ -40,5 +49,7 @@ def levenshtein(source, target):
     return acc
 
 metrics = {
+    "categorical_crossentropy": (categorical_crossentropy, 1000),
+    "binary_crossentropy": (binary_crossentropy, 1000),
     "levenshtein": (levenshtein, 1000),
 }

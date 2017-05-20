@@ -15,8 +15,7 @@ __pycache__
 cache/
 *.mp4
 *.png
-todo
 
-# Include examples #
+# Include examples and reports #
 ####################
-!examples/piano_net_q.ipynb
+!reports/**

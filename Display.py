@@ -10,8 +10,8 @@ def progress(train):
     table = parse_log(output_dir + "/log.txt")
 
     for metric, data in sorted(table.items()):
-        plt.title(metric)
-        plt.plot(data)
+        plt.ylabel(metric)
+        plt.plot(range(1, len(data) + 1), data)
         plt.xlabel("Epoch")
         plt.savefig(output_dir + "/{}.png".format(metric))
         if train["ipython"]:
@@ -41,6 +41,7 @@ def predict_seq(multidim):
                 guided_predict[i][choice] = 1
 
         plt.imshow(y.T, aspect="auto", origin="lower", cmap="Blues", interpolation="nearest")
+        plt.title("Correct")
         plt.savefig(output_dir + "/correct_predict.png")
         if train["ipython"]:
             plt.show()
@@ -48,6 +49,7 @@ def predict_seq(multidim):
 
         try:
             plt.imshow(guided_predict.T, aspect="auto", origin="lower", cmap="Blues", interpolation="nearest")
+            plt.title("Guided predict")
             plt.savefig(output_dir + "/guided_predict_{}.png".format(train["epoch"]))
             if train["ipython"]:
                 plt.show()
@@ -58,6 +60,7 @@ def predict_seq(multidim):
         try:
             plt.imshow(raw_predict.T, aspect="auto", origin="lower", norm=matplotlib.colors.LogNorm(), cmap="jet", interpolation="nearest")
             plt.colorbar()
+            plt.title("Raw predict")
             plt.savefig(output_dir + "/raw_predict_{}.png".format(train["epoch"]))
             if train["ipython"]:
                 plt.show()

@@ -14,12 +14,15 @@ def train(
 
         data_test=None,
         metrics=None,
+        model_test=None,
 
         displays=None,
         ipython=False,
 ):
     if metrics is None: metrics = []
     if displays is None: displays = []
+    model_train = model
+    model = model_test if model_test else model_train
 
     epoch = 0
     model_files = natsort.natsorted(glob.glob(output_dir + "/model_*"))
@@ -32,7 +35,7 @@ def train(
             shutil.rmtree(output_dir)
             epoch = 0
         else:
-            model.load_weights(model_files[-1])
+            model_train.load_weights(model_files[-1])
     def mkdir(path):
         parent = os.path.dirname(path)
         if not os.path.exists(parent):
@@ -59,6 +62,7 @@ def train(
 
     def measure(cmp, data, pts):
         x, y = data
+        pts = pts[:len(x)]
         correct = None
         predict = None
         score = 0
@@ -74,10 +78,11 @@ def train(
     scope = locals()
     def cb_log(e, logs):
         nonlocal epoch
+        print(e, epoch)
         epoch += 1
         scope["epoch"] = epoch
 
-        model.save_weights(output_dir + "/model_{}.h5".format(epoch))
+        model_train.save_weights(output_dir + "/model_{}.h5".format(epoch))
 
         msg = ""
         msg += "Epoch {}".format(epoch)
@@ -102,41 +107,49 @@ def train(
         if ipython:
             from IPython.display import clear_output
             clear_output()
+            from IPython.core.display import display, HTML
+            display(HTML('''
+                <style>
+                    .output_wrapper, .output {
+                        height:auto !important;
+                        max-height:none;
+                    }
+                    .output_scroll {
+                        box-shadow:none !important;
+                        webkit-box-shadow:none !important;
+                    }
+                </style>
+            '''))
         print("\r" + msg)
-        display()
+        run_displays()
 
-    if ipython:
-        from IPython.core.display import display, HTML
-        display(HTML('''
-            <style>
-                .output_wrapper, .output {
-                    height:auto !important;
-                    max-height:none;
-                }
-                .output_scroll {
-                    box-shadow:none !important;
-                    webkit-box-shadow:none !important;
-                }
-            </style>
-        '''))
-
-    def display():
+    def run_displays():
         for display in displays:
             try:
                 display(scope)
             except:
                 traceback.print_exc()
 
-    def train(epochs=1, **kwargs):
+    def train(epochs=None, **kwargs):
         from keras.callbacks import LambdaCallback
-        epochs -= epoch
-
         if epoch:
-            display()
-        model.fit(*data_train,
-                  epochs=epochs,
-                  validation_data=data_test if validate else None,
-                  verbose=1,
-                  callbacks=[LambdaCallback(on_epoch_end=cb_log)],
-                  **kwargs)
+            run_displays()
+
+        if epochs is not None:
+            model_train.fit(*data_train,
+                            epochs=epochs,
+                            validation_data=data_test if validate else None,
+                            verbose=1,
+                            callbacks=[LambdaCallback(on_epoch_end=cb_log)],
+                            initial_epoch=epoch,
+                            **kwargs)
+        else:
+            while True:
+                model_train.fit(*data_train,
+                                epochs=epoch+1,
+                                validation_data=data_test if validate else None,
+                                verbose=1,
+                                callbacks=[LambdaCallback(on_epoch_end=cb_log)],
+                                initial_epoch=epoch,
+                                **kwargs)
     return train
